@@ -1,0 +1,24 @@
+{
+  "name": "jupiter-agent-bench",
+  "version": "0.1.0",
+  "description": "Benchmark for how safely and correctly AI agents use Jupiter tools on Solana. Dry-run only: nothing is ever signed.",
+  "scripts": {
+    "bench": "tsx src/cli.ts",
+    "report": "tsx src/report.ts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@solana/web3.js": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "private": true,
+  "type": "module"
+}
