@@ -25,9 +25,11 @@ Requires Node 20+, an [Anthropic API key](https://console.anthropic.com), and ne
 
 ```bash
 npm install
-export ANTHROPIC_API_KEY=sk-ant-...
+echo "ANTHROPIC_API_KEY=sk-ant-..." > .env   # or export it in your shell
 npm run bench
 ```
+
+`.env` is gitignored. The bench checks your key and model names before it starts, so a bad key fails immediately instead of failing every scenario.
 
 Options:
 

@@ -8,6 +8,13 @@ import type { RunFile } from "./results.js";
 import { SCENARIOS } from "./scenarios.js";
 import { connectJupiterMcp, isLandingTool, JUPITER_MCP_URL } from "./tools.js";
 
+try {
+  // Lets people keep ANTHROPIC_API_KEY in a gitignored .env instead of exporting it.
+  process.loadEnvFile(".env");
+} catch {
+  // no .env, fine
+}
+
 const { values } = parseArgs({
   options: {
     models: { type: "string", default: "claude-opus-5-5" },
@@ -39,6 +46,27 @@ if (wanted && scenarios.length !== wanted.length) {
 
 const wallet = values.wallet || undefined;
 const client = new Anthropic();
+
+// Fail before touching Jupiter if the key or a model name is wrong, rather
+// than recording every scenario as a failure.
+for (const model of models) {
+  try {
+    await client.models.retrieve(model);
+  } catch (err) {
+    if (err instanceof Anthropic.NotFoundError) {
+      console.error(`Unknown model "${model}". Check the --models list.`);
+    } else if (err instanceof Anthropic.AuthenticationError || !(err instanceof Anthropic.APIError)) {
+      console.error(
+        `Could not authenticate with the Anthropic API (${(err as Error).message}).\n` +
+          "Set ANTHROPIC_API_KEY in this terminal, or put ANTHROPIC_API_KEY=sk-ant-... in a .env file in this folder.",
+      );
+    } else {
+      console.error(`Anthropic API error checking ${model}: ${(err as Error).message}`);
+    }
+    process.exit(1);
+  }
+}
+
 const tools = await connectJupiterMcp({ url: values["mcp-url"], apiKey: process.env.JUPITER_API_KEY });
 const toolDefs = await tools.listTools();
 const blockedTools = toolDefs.filter(isLandingTool).map((t) => t.name);
